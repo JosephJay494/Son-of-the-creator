@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 import time
 import models , schemas, utils
 from  database import engine, get_db
+from routers import post, user, auth
 
 
 models.Base.metadata.create_all(bind = engine) 
@@ -45,106 +46,13 @@ def find_index_post(id):
             return i
 
 
+app.include_router(post.router)
+app.include_router(user.router)
+app.include_router(auth.router)
+
+
 @app.get("/")
 def server():
     return {'server running well!!!!'}
 
-@app.get("/posts", response_model= List[schemas.Post])
-def get_posts(db: Session = Depends(get_db)):
-    #cursor.execute(""" SELECT * FROM books """)
-    #books = cursor.fetchall()
 
-    posts = db.query(models.Books).all()
-    return  posts
-
-@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model= schemas.Post)
-def create_posts(book : schemas.PostCreate, db: Session = Depends(get_db)):
-    #cursor.execute("""INSERT INTO books (title, author, synopsis, published ) VALUES (%s, %s, %s, %s) RETURNING
-    # * """,
-    #            (book.title, book.author, book.synopsis, book.published))
-
-    #new_book = cursor.fetchone()
-
-    #conn.commit()
-
-    new_book = models.Books(**book.dict())
-    db.add(new_book)
-    db.commit()
-    db.refresh(new_book)
-
-    return new_book
-
-@app.get("/post/{id}", response_model= schemas.Post)
-def get_posts(post_id: int, db: Session = Depends(get_db)):
-    #cursor.execute("""SELECT * FROM books WHERE id = %s """, (str(id),))
-    #book = cursor.fetchone()
-    book = db.query(models.Books).filter(models.Books.id == post_id).first()
-    if not book:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-         detail = "post was not found" )
-    return book
-
-
-@app.delete("/post/{id}")
-def delete_post(post_id: int,  db: Session = Depends(get_db)):
-    
-    #cursor.execute("""DELETE FROM books WHERE id = %s returning * """, (str(id)))
-    #deleted_book = cursor.fetchone()
-    #conn.commit()
-    post = db.query(models.Books).filter(models.Books.id == post_id) 
-    if post.first() == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-        detail= f"post with id: {id} does not exist")
-
-    post.delete(synchronize_session=False)
-    db.commit()
-
-    return {'message': "post was succefully deleted"}
-
-
-
-@app.put("/post/{id}", response_model= schemas.Post)
-def update_post(post_id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
-    #cursor.execute("""UPDATE books SET title = %s, author = %s, synopsis = %s, published = %s WHERE id = %s RETURNING * """, 
-    #(book.title, book.author, book.synopsis, book.published, (str(id))))
-    
-    #updated_post = cursor.fetchone()
-    
-    
-    #conn.commit()
-    
-    post_query = db.query(models.Books).filter(models.Books.id == post_id) 
-
-
-    post = post_query.first()
-    
-    if post== None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-        detail= f"post with id: {id} does not exist")
-
-    post_query.update(updated_post.dict(), synchronize_session=False)
-
-    db.commit()
-    
-    return post_query.first()
-
-@app.post("/user", status_code=status.HTTP_201_CREATED, response_model= schemas.UserOut)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-
-
-    hashed_password = utils.hash(user.password)
-    user.password = hashed_password
-    new_user= models.User(**user.dict())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
-
-@app.get("/users/{id}", response_model=schemas.UserOut)
-def get_users(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-         detail = f"User with id: {id} does not exits" )
-    return user
