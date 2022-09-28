@@ -52,3 +52,5 @@ Start the server:
 python -m uvicorn Packages.main:app --reload
 
 ```
+ln this section I modified the module models.py with adding the Users class that will automatically create a table for users in the database and also created the module utils.py that will handle the encryption of passwords in the database once a user account has been created.
+
