@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-import models , schemas
+import models , schemas, oauth2
 from  database import get_db
 
 
@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model= List[schemas.Post])
-def get_posts(db: Session = Depends(get_db)):
+def get_posts(db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user)):
     #cursor.execute(""" SELECT * FROM books """)
     #books = cursor.fetchall()
 
@@ -21,7 +21,7 @@ def get_posts(db: Session = Depends(get_db)):
     return  posts
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model= schemas.Post)
-def create_posts(book : schemas.PostCreate, db: Session = Depends(get_db)):
+def create_posts(book : schemas.PostCreate, db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user)):
     #cursor.execute("""INSERT INTO books (title, author, synopsis, published ) VALUES (%s, %s, %s, %s) RETURNING
     # * """,
     #            (book.title, book.author, book.synopsis, book.published))
@@ -29,7 +29,7 @@ def create_posts(book : schemas.PostCreate, db: Session = Depends(get_db)):
     #new_book = cursor.fetchone()
 
     #conn.commit()
-
+    print(current_user.email)
     new_book = models.Books(**book.dict())
     db.add(new_book)
     db.commit()
@@ -38,7 +38,7 @@ def create_posts(book : schemas.PostCreate, db: Session = Depends(get_db)):
     return new_book
 
 @router.get("/{id}", response_model= schemas.Post)
-def get_posts(post_id: int, db: Session = Depends(get_db)):
+def get_posts(post_id: int, db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user)):
     #cursor.execute("""SELECT * FROM books WHERE id = %s """, (str(id),))
     #book = cursor.fetchone()
     book = db.query(models.Books).filter(models.Books.id == post_id).first()
@@ -49,7 +49,7 @@ def get_posts(post_id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}")
-def delete_post(post_id: int,  db: Session = Depends(get_db)):
+def delete_post(post_id: int,  db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user)):
     
     #cursor.execute("""DELETE FROM books WHERE id = %s returning * """, (str(id)))
     #deleted_book = cursor.fetchone()
@@ -67,7 +67,7 @@ def delete_post(post_id: int,  db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model= schemas.Post)
-def update_post(post_id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
+def update_post(post_id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user)):
     #cursor.execute("""UPDATE books SET title = %s, author = %s, synopsis = %s, published = %s WHERE id = %s RETURNING * """, 
     #(book.title, book.author, book.synopsis, book.published, (str(id))))
     

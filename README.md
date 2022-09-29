@@ -57,3 +57,5 @@ ln this section I modified the module models.py with adding the Users class that
 In this section I created the module auth.py that will authenticated the uses when they Login their accountsand l've also creater the File routers which contains auth, post and user.py 
 
 ln this section i created Jtw token that will help to increase security in our API for our users as they Login.
+
+In this section l've created the user authenticator that will only allow user to create, read, update and delet once they have logged in.   
