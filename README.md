@@ -54,4 +54,6 @@ python -m uvicorn Packages.main:app --reload
 ```
 ln this section I modified the module models.py with adding the Users class that will automatically create a table for users in the database and also created the module utils.py that will handle the encryption of passwords in the database once a user account has been created.
 
-Inthis section I created the module auth.py that will authenticated the uses when they Login their accountsand l've also creater the File routers which contains auth, post and user.py 
+In this section I created the module auth.py that will authenticated the uses when they Login their accountsand l've also creater the File routers which contains auth, post and user.py 
+
+ln this section i created Jtw token that will help to increase security in our API for our users as they Login.
