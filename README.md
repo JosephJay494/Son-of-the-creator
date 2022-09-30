@@ -58,4 +58,7 @@ In this section I created the module auth.py that will authenticated the uses wh
 
 ln this section i created Jtw token that will help to increase security in our API for our users as they Login.
 
-In this section l've created the user authenticator that will only allow user to create, read, update and delet once they have logged in.   
+In this section l've created the user authenticator that will only allow user to create, read, update and delet once they have logged in.  
+
+I established the relationship  between the tables in the database which are books and users in a way that i can assign a particular post to its user, 'showing who posted the post'.
+Now in this section one can only delete a post if he/she is the ower of the post that they may want to delete.
