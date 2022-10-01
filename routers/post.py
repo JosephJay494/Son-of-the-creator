@@ -13,15 +13,23 @@ router = APIRouter(
 )
 
 @router.get("/", response_model= List[schemas.Post])
-def get_posts(db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user), limit: int = 10 , skip : int = 0, search: Optional[str] = "" ):
+def get_posts(db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user),
+ limit: int = 10 , skip : int = 0, search: Optional[str] = "" ):
     #cursor.execute(""" SELECT * FROM books """)
     #books = cursor.fetchall()
-    print(limit)
+    #print(limit)
     posts = db.query(models.Books).filter(models.Books.title.contains(search)).limit(limit).offset(skip).all()
+    
+    results = db.query(models.Books)
+    print(results)
+    
     return  posts
 
+    
+
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model= schemas.Post)
-def create_posts(book : schemas.PostCreate, db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user)):
+def create_posts(book : schemas.PostCreate, db: Session = Depends(get_db),
+         current_user: int = Depends(oauth2.get_current_user)):
     #cursor.execute("""INSERT INTO books (title, author, synopsis, published ) VALUES (%s, %s, %s, %s) RETURNING
     # * """,
     #            (book.title, book.author, book.synopsis, book.published))
@@ -44,7 +52,7 @@ def get_posts(post_id: int, db: Session = Depends(get_db), current_user: int =  
     book = db.query(models.Books).filter(models.Books.id == post_id).first()
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-         detail = "post was not found" )
+         detail = f"post was not found" )
     return book
 
 
@@ -54,16 +62,16 @@ def delete_post(post_id: int,  db: Session = Depends(get_db), current_user: int 
     #cursor.execute("""DELETE FROM books WHERE id = %s returning * """, (str(id)))
     #deleted_book = cursor.fetchone()
     #conn.commit()
-    post_query = db.query(models.Books).filter(models.Books.id == id)
+    post_query = db.query(models.Books).filter(models.Books.id == post_id)
 
     post_id = post_query.first() 
-    if post_id.first() == None:
+    if post_id == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
         detail= f"post with id: {id} does not exist")
 
     if post_id.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Not authorized to perform requested action")
+                            detail= f"Not authorized to perform requested action")
 
     post_query.delete(synchronize_session=False)
     db.commit()
@@ -93,7 +101,7 @@ def update_post(post_id: int, updated_post: schemas.PostCreate, db: Session = De
 
     if post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Not authorized to perform requested action")
+                            detail= f"Not authorized to perform requested action")
 
     post_query.update(updated_post.dict(), synchronize_session=False)
 
