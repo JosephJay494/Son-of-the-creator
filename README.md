@@ -64,3 +64,5 @@ I established the relationship  between the tables in the database which are boo
 Now in this section one can only delete a post if he/she is the ower of the post that they may want to delete.
 
 In this section clean some of my cords mainly in the main.py module and i also edited the get_post router making it possible for users to be able to search for individual post and also skip some post if they do want them.
+
+In this section i created the .env file that holds all the environment variables 
