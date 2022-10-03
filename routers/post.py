@@ -1,5 +1,9 @@
+from cProfile import label
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
+from requests import post
+import sqlalchemy
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 import models , schemas, oauth2
 from  database import get_db
@@ -11,17 +15,19 @@ router = APIRouter(
     prefix="/posts",
     tags= ['Posts']
 )
-
-@router.get("/", response_model= List[schemas.Post])
+#@router.get("/", response_model= List[schemas.Post])
+@router.get("/", response_model= List[schemas.PostOut])
 def get_posts(db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user),
  limit: int = 10 , skip : int = 0, search: Optional[str] = "" ):
     #cursor.execute(""" SELECT * FROM books """)
     #books = cursor.fetchall()
     #print(limit)
-    posts = db.query(models.Books).filter(models.Books.title.contains(search)).limit(limit).offset(skip).all()
+    #posts = db.query(models.Books).filter(models.Books.title.contains(search)).limit(limit).offset(skip).all()
     
-    results = db.query(models.Books)
-    print(results)
+    posts = db.query(models.Books, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Vote.post_id == models.Books.id, isouter = True).group_by(models.Books.id).filter(
+            models.Books.title.contains(search)).limit(limit).offset(skip).all()
+    
     
     return  posts
 
@@ -45,11 +51,18 @@ def create_posts(book : schemas.PostCreate, db: Session = Depends(get_db),
 
     return new_book
 
-@router.get("/{id}", response_model= schemas.Post)
+@router.get("/{id}", response_model= schemas.PostOut)
 def get_posts(post_id: int, db: Session = Depends(get_db), current_user: int =  Depends(oauth2.get_current_user)):
     #cursor.execute("""SELECT * FROM books WHERE id = %s """, (str(id),))
     #book = cursor.fetchone()
-    book = db.query(models.Books).filter(models.Books.id == post_id).first()
+    #book = db.query(models.Books).filter(models.Books.id == post_id).first()
+
+
+    book = db.query(models.Books, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Vote.post_id == models.Books.id, isouter = True).group_by(models.Books.id).filter(
+            models.Books.id == post_id).first()
+
+
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
          detail = f"post was not found" )

@@ -68,3 +68,5 @@ In this section clean some of my cords mainly in the main.py module and i also e
 In this section i created the .env file that holds all the environment variables 
 
 In this section i implemented the voting or likes system which enables the users to like the post.
+
+In this section l have implemented the join and count function that will be reponsible for count the number of votes, the join function is joinig the Books and vote tables.
