@@ -70,3 +70,13 @@ In this section i created the .env file that holds all the environment variables
 In this section i implemented the voting or likes system which enables the users to like the post.
 
 In this section l have implemented the join and count function that will be reponsible for count the number of votes, the join function is joinig the Books and vote tables.
+
+In this section I've database migrations using Alembic.I also set the CORS (CROSS ORIGIN RESOURCE SHARING)
+
+
+Install the required dependencies:
+
+```
+python -m pip install -r requirements.txt
+
+```
